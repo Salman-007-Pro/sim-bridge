@@ -16,5 +16,4 @@ android {
 dependencies {
     api(project(":core:model"))
     testImplementation(libs.junit)
-    testImplementation(libs.bouncycastle.pkix)
 }

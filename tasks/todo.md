@@ -14,20 +14,20 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 
 ## Phase 0 — Setup and device feasibility
 
-- [ ] Git init, Gradle wrapper, version catalog, module scaffold
-- [ ] Host Capability Probe screen
-- [ ] `docs/device-matrix.md` template
-- [ ] Exit gate: both APKs build (`assembleDebug`)
+- [x] Git init, Gradle wrapper, version catalog, module scaffold
+- [x] Host Capability Probe screen
+- [x] `docs/device-matrix.md` template
+- [x] Exit gate: both APKs build (`assembleDebug`)
 - [ ] Exit gate (device): install on both phones, record probe in device matrix
 
 ## Phase 1 — Protocol, crypto, transport
 
-- [ ] `core:protocol` envelope, message types, codec, frame codec, version negotiation, sequence guard
-- [ ] `core:crypto` fingerprint, pairing token, SAS, QR payload, pinned TLS, Keystore identity
-- [ ] `core:transport` TLS server/client, session, heartbeat, handshake, reconnect policy, NSD
-- [ ] `core:storage` command ledger, paired device store
-- [ ] `core:testing` FakeHost, test identities
-- [ ] Exit gate: JVM tests pass
+- [x] `core:protocol` envelope, message types, codec, version negotiation, sequence guard
+- [x] `core:crypto` fingerprint, pairing token, SAS, QR payload, pinned TLS, Keystore identity
+- [x] `core:transport` frame IO, TLS server/client, session, heartbeat, handshake, backoff, NSD
+- [x] `core:storage` command ledger (Room + in-memory), paired device store, redacted log
+- [x] `core:testing` FakeHost, test identities
+- [x] Exit gate: JVM tests pass (model 6, protocol 11, crypto 8, transport 12, storage 2)
 
 ## Phase 2 — Pairing, onboarding, dashboards
 

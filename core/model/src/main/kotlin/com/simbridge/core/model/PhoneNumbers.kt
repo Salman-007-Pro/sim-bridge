@@ -28,9 +28,9 @@ class DialPolicy(
     enum class Verdict { ALLOWED, BLOCKED_EMERGENCY, BLOCKED_PREMIUM, INVALID }
 
     fun evaluate(raw: String): Verdict {
-        if (!PhoneNumbers.isDialable(raw)) return Verdict.INVALID
         val n = PhoneNumbers.normalize(raw)
         if (n in emergencyNumbers) return Verdict.BLOCKED_EMERGENCY
+        if (!PhoneNumbers.isDialable(raw)) return Verdict.INVALID
         if (premiumPrefixes.any { n.startsWith(it) }) return Verdict.BLOCKED_PREMIUM
         return Verdict.ALLOWED
     }
