@@ -38,9 +38,9 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 
 ## Phase 3 — SMS bridge
 
-- [ ] Host default SMS role components + gateway + Room store
-- [ ] Sync (`SYNC_REQUEST` / `SYNC_DELTA`) + idempotent send
-- [ ] Client threads, conversation, compose, status
+- [x] Host default SMS role components + gateway + Room store
+- [x] Sync (`SYNC_REQUEST` / `SYNC_DELTA` with `syncEpoch`) + idempotent send
+- [x] Client threads, conversation, compose, status, OTP masking, contact names
 - [ ] Exit gate (device): real carrier SMS both ways, no duplicates
 
 ## Phase 4 — Remote dialer

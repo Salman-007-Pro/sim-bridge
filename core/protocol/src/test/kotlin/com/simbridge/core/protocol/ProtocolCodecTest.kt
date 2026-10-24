@@ -45,7 +45,7 @@ class ProtocolCodecTest {
         MessageType.SMS_RECEIVED to (SmsMessage.serializer() to sms),
         MessageType.SMS_STATUS to (SmsStatusUpdate.serializer() to SmsStatusUpdate(7, "m1", SmsStatus.DELIVERED)),
         MessageType.SYNC_REQUEST to (SyncRequest.serializer() to SyncRequest(0, 0)),
-        MessageType.SYNC_DELTA to (SyncDelta.serializer() to SyncDelta(listOf(sms), listOf(call), 9, 4, false)),
+        MessageType.SYNC_DELTA to (SyncDelta.serializer() to SyncDelta("epoch-1", listOf(sms), listOf(call), 9, 4, false)),
         MessageType.ERROR to (ErrorBody.serializer() to ErrorBody(ErrorCode.REPLAY, "dup")),
         MessageType.ACK to (Ack.serializer() to Ack()),
         MessageType.UNPAIR to (Unpair.serializer() to Unpair("user")),

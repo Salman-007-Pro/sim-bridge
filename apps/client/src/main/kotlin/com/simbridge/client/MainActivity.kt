@@ -25,11 +25,12 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var bridge: ClientBridge
 
     private val pairingLink = mutableStateOf<String?>(null)
+    private val openThread = mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        pairingLink.value = linkFrom(intent)
+        handle(intent)
         setContent {
             SimBridgeTheme {
                 val state by bridge.state.collectAsStateWithLifecycle()
@@ -43,7 +44,13 @@ class MainActivity : ComponentActivity() {
                 if (onboarding) {
                     ClientOnboardingScreen(incomingLink = pairingLink.value)
                 } else {
-                    ClientNavHost(state = state, bridge = bridge, scope = scope)
+                    ClientNavHost(
+                        state = state,
+                        bridge = bridge,
+                        scope = scope,
+                        openThread = openThread.value,
+                        onThreadOpened = { openThread.value = null },
+                    )
                 }
             }
         }
@@ -51,9 +58,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        linkFrom(intent)?.let { pairingLink.value = it }
+        handle(intent)
     }
 
-    private fun linkFrom(intent: Intent?): String? =
-        intent?.data?.toString()?.takeIf { it.startsWith("${PairingPayload.SCHEME}://pair") }
+    private fun handle(intent: Intent?) {
+        intent?.data?.toString()?.takeIf { it.startsWith("${PairingPayload.SCHEME}://pair") }?.let { pairingLink.value = it }
+        intent?.getStringExtra(EXTRA_OPEN_THREAD)?.let { openThread.value = it }
+    }
+
+    companion object {
+        const val EXTRA_OPEN_THREAD = "open_thread"
+    }
 }

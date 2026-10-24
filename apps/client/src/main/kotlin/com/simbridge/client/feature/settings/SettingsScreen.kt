@@ -1,5 +1,14 @@
 package com.simbridge.client.feature.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -63,6 +72,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             )
             SecondaryButton("Set Host address", onClick = { editingEndpoint = true })
         }
+        PermissionsCard()
         SectionCard(title = "Privacy") {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -191,6 +201,49 @@ private fun HostCard(state: ClientState) {
         }
     }
 }
+
+@Composable
+private fun PermissionsCard() {
+    val context = LocalContext.current
+    var refresh by remember { mutableIntStateOf(0) }
+    LifecycleResumeEffect(Unit) {
+        refresh++
+        onPauseOrDispose { }
+    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { refresh++ }
+    val notifications = remember(refresh) {
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || granted(context, Manifest.permission.POST_NOTIFICATIONS)
+    }
+    val contacts = remember(refresh) { granted(context, Manifest.permission.READ_CONTACTS) }
+    SectionCard(title = "Permissions") {
+        PermissionRow(
+            title = "Notifications",
+            description = "Needed to ring for incoming calls and show new messages.",
+            granted = notifications,
+            onAllow = { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) launcher.launch(Manifest.permission.POST_NOTIFICATIONS) },
+        )
+        PermissionRow(
+            title = "Contact names (optional)",
+            description = "Shows names instead of numbers. Contacts never leave this phone.",
+            granted = contacts,
+            onAllow = { launcher.launch(Manifest.permission.READ_CONTACTS) },
+        )
+    }
+}
+
+@Composable
+private fun PermissionRow(title: String, description: String, granted: Boolean, onAllow: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (granted) StatusChip("Allowed", StatusTone.Positive) else TextButton(onClick = onAllow) { Text("Allow") }
+    }
+}
+
+private fun granted(context: android.content.Context, permission: String) =
+    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
 @Composable
 private fun CapabilityRow(label: String, status: CapabilityStatus?) {

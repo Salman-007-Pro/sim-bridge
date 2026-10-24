@@ -22,6 +22,7 @@ class ClientPrefs @Inject constructor(@ApplicationContext context: Context) {
     private val manualEndpoint = stringPreferencesKey("manual_endpoint")
     private val smsCheckpoint = longPreferencesKey("sms_checkpoint")
     private val callCheckpoint = longPreferencesKey("call_checkpoint")
+    private val syncEpochKey = stringPreferencesKey("sync_epoch")
     private val hideMessageContent = booleanPreferencesKey("hide_message_content")
 
     val manualEndpointText: Flow<String?> = store.data.map { it[manualEndpoint] }
@@ -43,9 +44,13 @@ class ClientPrefs @Inject constructor(@ApplicationContext context: Context) {
     suspend fun isHidingContent(): Boolean = hideContentOnLockScreen.first()
     suspend fun setHideContent(hide: Boolean) = store.edit { it[hideMessageContent] = hide }
 
+    suspend fun syncEpoch(): String? = store.data.first()[syncEpochKey]
+    suspend fun setSyncEpoch(epoch: String) = store.edit { it[syncEpochKey] = epoch }
+
     suspend fun clearSyncState() = store.edit {
         it.remove(smsCheckpoint)
         it.remove(callCheckpoint)
+        it.remove(syncEpochKey)
     }
 
     suspend fun clearAll() = store.edit { it.clear() }

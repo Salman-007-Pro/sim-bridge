@@ -7,6 +7,7 @@ import com.simbridge.core.storage.ledger.CommandLedger
 import com.simbridge.core.storage.ledger.LedgerDatabase
 import com.simbridge.core.storage.ledger.RoomCommandLedger
 import com.simbridge.core.storage.pairing.PairedDeviceStore
+import com.simbridge.host.data.HostDatabase
 import com.simbridge.host.navigation.HostTool
 import com.simbridge.host.session.HostCommandHandler
 import dagger.Module
@@ -54,6 +55,10 @@ object HostModule {
     @Provides
     @Singleton
     fun commandLedger(db: LedgerDatabase): CommandLedger = RoomCommandLedger(db.ledgerDao())
+
+    @Provides
+    @Singleton
+    fun hostDatabase(@ApplicationContext context: Context): HostDatabase = HostDatabase.create(context)
 }
 
 @Module

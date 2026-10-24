@@ -1,0 +1,226 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "c836a24959fc18c99051d2f10e1b855d",
+    "entities": [
+      {
+        "tableName": "sms",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientMessageId` TEXT, `address` TEXT NOT NULL, `body` TEXT NOT NULL, `direction` TEXT NOT NULL, `status` TEXT NOT NULL, `timestampMs` INTEGER NOT NULL, `partsTotal` INTEGER NOT NULL, `partsSent` INTEGER NOT NULL, `partsDelivered` INTEGER NOT NULL, `errorCode` INTEGER, `providerUri` TEXT, `changeSeq` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientMessageId",
+            "columnName": "clientMessageId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "body",
+            "columnName": "body",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "direction",
+            "columnName": "direction",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampMs",
+            "columnName": "timestampMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "partsTotal",
+            "columnName": "partsTotal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "partsSent",
+            "columnName": "partsSent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "partsDelivered",
+            "columnName": "partsDelivered",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "errorCode",
+            "columnName": "errorCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "providerUri",
+            "columnName": "providerUri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "changeSeq",
+            "columnName": "changeSeq",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sms_clientMessageId",
+            "unique": true,
+            "columnNames": [
+              "clientMessageId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_sms_clientMessageId` ON `${TABLE_NAME}` (`clientMessageId`)"
+          },
+          {
+            "name": "index_sms_changeSeq",
+            "unique": false,
+            "columnNames": [
+              "changeSeq"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sms_changeSeq` ON `${TABLE_NAME}` (`changeSeq`)"
+          },
+          {
+            "name": "index_sms_address",
+            "unique": false,
+            "columnNames": [
+              "address"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sms_address` ON `${TABLE_NAME}` (`address`)"
+          }
+        ]
+      },
+      {
+        "tableName": "call_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`callId` TEXT NOT NULL, `number` TEXT, `direction` TEXT NOT NULL, `status` TEXT NOT NULL, `startedAtMs` INTEGER NOT NULL, `connectedAtMs` INTEGER, `endedAtMs` INTEGER, `disconnectReason` TEXT, `changeSeq` INTEGER NOT NULL, PRIMARY KEY(`callId`))",
+        "fields": [
+          {
+            "fieldPath": "callId",
+            "columnName": "callId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "direction",
+            "columnName": "direction",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtMs",
+            "columnName": "startedAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "connectedAtMs",
+            "columnName": "connectedAtMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "endedAtMs",
+            "columnName": "endedAtMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "disconnectReason",
+            "columnName": "disconnectReason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "changeSeq",
+            "columnName": "changeSeq",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "callId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_call_records_changeSeq",
+            "unique": false,
+            "columnNames": [
+              "changeSeq"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_call_records_changeSeq` ON `${TABLE_NAME}` (`changeSeq`)"
+          }
+        ]
+      },
+      {
+        "tableName": "sync_clock",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `value` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c836a24959fc18c99051d2f10e1b855d')"
+    ]
+  }
+}

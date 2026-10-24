@@ -97,8 +97,10 @@ data class SmsStatusUpdate(
 @Serializable
 data class SyncRequest(val smsCheckpoint: Long, val callCheckpoint: Long, val limit: Int = 200)
 
+/** [syncEpoch] changes whenever the Host's store is recreated; Clients then restart from checkpoint 0. */
 @Serializable
 data class SyncDelta(
+    val syncEpoch: String,
     val sms: List<SmsMessage>,
     val calls: List<CallInfo>,
     val smsCheckpoint: Long,

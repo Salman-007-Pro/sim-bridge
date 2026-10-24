@@ -52,7 +52,24 @@ object HostPermissions {
     fun isRoleHeld(context: Context, role: String): Boolean =
         context.getSystemService(RoleManager::class.java)?.isRoleHeld(role) == true
 
-    private fun roleItems(context: Context): List<PermissionItem> = emptyList()
+    private fun roleItems(context: Context): List<PermissionItem> {
+        val rm = context.getSystemService(RoleManager::class.java) ?: return emptyList()
+        return buildList {
+            if (rm.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                add(
+                    PermissionItem(
+                        id = "role_sms",
+                        title = "Default SMS app",
+                        rationale = "Needed to send and receive SMS for your Client. While SIM Bridge is the default, " +
+                            "your previous SMS app stops receiving new messages; you can switch back any time.",
+                        granted = rm.isRoleHeld(RoleManager.ROLE_SMS),
+                        required = true,
+                        request = PermissionRequest.Role(RoleManager.ROLE_SMS),
+                    ),
+                )
+            }
+        }
+    }
 
     fun granted(context: Context, permission: String): Boolean =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
