@@ -173,6 +173,44 @@ class SessionTest {
     }
 
     @Test
+    fun acceptFilterDropsConnectionsBeforeTls() = runBlocking {
+        val accepted = CompletableDeferred<BridgeSession>()
+        val server = BridgeServer(
+            sslContext = { TlsContexts.create(hostIdentity, PinnedTrustManager(allowAnyPeer = true)) },
+            scope = scope,
+            preferredPort = 0,
+            acceptFilter = { false },
+        ) { accepted.complete(it) }
+        servers += server
+        val port = server.start()
+        val result = runCatching { BridgeConnector.connect(clientContext(), "127.0.0.1", port, scope) }
+        assertTrue("TLS must not complete when the filter rejects", result.isFailure)
+        assertTrue(!accepted.isCompleted)
+        assertTrue(BridgeServer.localNetworkOnly(Socket().apply { bind(InetSocketAddress("127.0.0.1", 0)) }))
+    }
+
+    @Test
+    fun excessSilentConnectionsAreRefused() = runBlocking {
+        val server = BridgeServer(
+            sslContext = { TlsContexts.create(hostIdentity, PinnedTrustManager(allowAnyPeer = true)) },
+            scope = scope,
+            preferredPort = 0,
+            handshakeTimeoutMs = 5_000,
+            maxPendingHandshakes = 2,
+        ) { }
+        servers += server
+        val port = server.start()
+        val silent = List(2) { Socket().apply { connect(InetSocketAddress("127.0.0.1", port), 1_000) } }
+        kotlinx.coroutines.delay(300)
+        val extra = Socket().apply {
+            connect(InetSocketAddress("127.0.0.1", port), 1_000)
+            soTimeout = 2_000
+        }
+        assertEquals("server should close the extra connection at once", -1, extra.getInputStream().read())
+        (silent + extra).forEach { it.close() }
+    }
+
+    @Test
     fun backoffGrowsAndIsCapped() {
         val backoff = Backoff(initialMs = 500, maxMs = 8_000, jitter = 0.0)
         assertEquals(500, backoff.delayFor(0))

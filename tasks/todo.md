@@ -70,10 +70,26 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 
 ## Phase 7 — Audio integration (only if Go)
 
+- Gated: Phase 6 decision is NO-GO until device evidence exists. Not started on purpose (PRD 14: do not build the
+  media path before a capture/inject provider is proven).
+
 ## Phase 8 — Public readiness
 
-- [ ] Security review, privacy policy draft, distribution decision, compatibility tiers
+- [x] Security review (`docs/security-review.md`) — 3 findings fixed + tested: LAN-only accept filter,
+      handshake flood limits, Host key reset
+- [x] Privacy policy draft (`docs/privacy-policy.md`) — needs legal review
+- [x] Distribution decision (`docs/distribution.md`) — private sideload; Play deferred
+- [x] Compatibility tiers (`docs/compatibility.md`) — all devices Tier B until audio is verified
+- [ ] Independent security audit, legal review, Urdu localization (P2)
 
 ## Review
 
-(Har phase ke end par yahan results.)
+**Code status (25 Oct 2026):** Control-only MVP complete in code. 59 JVM tests pass; instrumented tests
+(Room repositories, Compose accessibility) compile and need a connected phone. Debug + signed release APKs build.
+
+**Not yet proven on hardware (no phone was connected to adb during development):**
+pairing on two phones, real carrier SMS, real calls, OEM background behaviour, 10-minute Wi-Fi reliability,
+and every audio experiment. Follow `docs/testing-on-devices.md` and `docs/audio-rnd/README.md`.
+
+**Protocol additions beyond PRD list:** `ACK` (command acknowledgement), `UNPAIR` (two-sided revoke),
+`SyncDelta.syncEpoch` (resync after Host store reset).

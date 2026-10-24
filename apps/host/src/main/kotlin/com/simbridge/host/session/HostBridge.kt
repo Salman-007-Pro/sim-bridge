@@ -39,6 +39,7 @@ import com.simbridge.host.di.ApplicationScope
 import com.simbridge.host.feature.probe.CapabilityProbe
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CompletableDeferred
@@ -126,7 +127,11 @@ class HostBridge @Inject constructor(
                     audioCapabilities = audioProvider.probe()
                     val id = identityStore.getOrCreate().also { identity = it }
                     val tls = TlsContexts.create(id, PinnedTrustManager(allowAnyPeer = true))
-                    val newServer = BridgeServer(sslContext = { tls }, scope = scope) { session -> onSession(session) }
+                    val newServer = BridgeServer(
+                        sslContext = { tls },
+                        scope = scope,
+                        acceptFilter = BridgeServer.localNetworkOnly,
+                    ) { session -> onSession(session) }
                     val port = newServer.start()
                     server = newServer
                     nsd.register("SIM Bridge ${hostName.take(24)}", port, id.fingerprint)
@@ -153,18 +158,18 @@ class HostBridge @Inject constructor(
     }
 
     fun stop() {
-        scope.launch(Dispatchers.IO) {
-            lifecycle.withLock {
-                statusJob?.cancel()
-                nsd.unregister()
-                server?.stop()
-                server = null
-                activeSession?.close(CloseReason.LOCAL)
-                activeSession = null
-                cancelPairing()
-                _state.update { HostBridgeState() }
-            }
-        }
+        scope.launch(Dispatchers.IO) { lifecycle.withLock { shutdownLocked() } }
+    }
+
+    private fun shutdownLocked() {
+        statusJob?.cancel()
+        nsd.unregister()
+        server?.stop()
+        server = null
+        activeSession?.close(CloseReason.LOCAL)
+        activeSession = null
+        cancelPairing()
+        _state.update { HostBridgeState() }
     }
 
     fun refreshAddresses() = _state.update { it.copy(addresses = NetworkAddresses.localIpv4()) }
@@ -224,9 +229,20 @@ class HostBridge @Inject constructor(
         BridgeLog.i(TAG, "Unpaired client ${Redaction.fingerprint(fingerprint)}")
     }
 
-    suspend fun unpairAll() {
+    /**
+     * Removes every paired phone and replaces this Host's TLS key, so no earlier pairing or leaked QR code
+     * can ever authenticate again. The bridge restarts with the new identity if it was running.
+     */
+    suspend fun resetIdentity() {
         pairedStore.current().forEach { unpair(it.fingerprint) }
-        handlers.forEach { it.onWipe() }
+        val wasRunning = lifecycle.withLock {
+            val running = server != null
+            shutdownLocked()
+            identity = identityStore.rotate()
+            running
+        }
+        BridgeLog.w(TAG, "Host identity rotated; all pairings removed")
+        if (wasRunning) start()
     }
 
     fun capabilities(): Capabilities {
@@ -248,6 +264,10 @@ class HostBridge @Inject constructor(
 
     private suspend fun onSession(session: BridgeSession) {
         val id = identity ?: return session.close(CloseReason.LOCAL)
+        if (handshakesInFlight.incrementAndGet() > MAX_HANDSHAKES_IN_FLIGHT) {
+            handshakesInFlight.decrementAndGet()
+            return session.close(CloseReason.AUTH_FAILED)
+        }
         val handshake = HostHandshake(
             hostName = hostName,
             hostFingerprint = id.fingerprint,
@@ -257,7 +277,12 @@ class HostBridge @Inject constructor(
             approver = { request -> awaitApproval(request) },
             clock = clock::now,
         )
-        when (val result = handshake.run(session)) {
+        val outcome = try {
+            handshake.run(session)
+        } finally {
+            handshakesInFlight.decrementAndGet()
+        }
+        when (val result = outcome) {
             is HostHandshakeResult.Rejected -> {
                 BridgeLog.w(TAG, "Rejected connection: ${result.failure} ${result.detail}")
                 if (_pairing.value is PairingState.AwaitingApproval || result.failure?.name?.startsWith("PAIRING") == true) {
@@ -347,7 +372,10 @@ class HostBridge @Inject constructor(
         }
     }
 
+    private val handshakesInFlight = AtomicInteger(0)
+
     private companion object {
         const val TAG = "HostBridge"
+        const val MAX_HANDSHAKES_IN_FLIGHT = 3
     }
 }

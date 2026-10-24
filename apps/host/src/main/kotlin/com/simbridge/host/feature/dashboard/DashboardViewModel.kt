@@ -65,4 +65,8 @@ class DashboardViewModel @Inject constructor(
     fun unpair(fingerprint: String) {
         viewModelScope.launch { bridge.unpair(fingerprint) }
     }
+
+    fun resetIdentity() {
+        viewModelScope.launch { bridge.resetIdentity() }
+    }
 }

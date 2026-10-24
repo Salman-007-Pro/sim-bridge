@@ -55,6 +55,7 @@ fun DashboardScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var confirmUnpair by remember { mutableStateOf<PairedDevice?>(null) }
+    var confirmReset by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
         onPauseOrDispose { }
@@ -72,7 +73,13 @@ fun DashboardScreen(
             BridgeCard(state, viewModel::startBridge, viewModel::stopBridge)
             SimCard(state)
             FeaturesCard(state, onOpenPermissions)
-            PairedCard(state.pairedClients, state.bridge.activeClient?.fingerprint, onPairNew) { confirmUnpair = it }
+            PairedCard(
+                clients = state.pairedClients,
+                activeFingerprint = state.bridge.activeClient?.fingerprint,
+                onPairNew = onPairNew,
+                onUnpair = { confirmUnpair = it },
+                onResetKeys = { confirmReset = true },
+            )
             SectionCard(title = "Tools") {
                 links.forEachIndexed { index, link ->
                     if (index > 0) HorizontalDivider()
@@ -84,6 +91,26 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+
+    if (confirmReset) {
+        AlertDialog(
+            onDismissRequest = { confirmReset = false },
+            title = { Text("Remove all phones and reset keys?") },
+            text = {
+                Text(
+                    "Every paired phone loses access immediately and this Host gets a new security key. " +
+                        "Use this if a paired phone was lost or stolen. You will need to pair again.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.resetIdentity()
+                    confirmReset = false
+                }) { Text("Reset", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("Cancel") } },
+        )
     }
 
     confirmUnpair?.let { device ->
@@ -189,6 +216,7 @@ private fun PairedCard(
     activeFingerprint: String?,
     onPairNew: () -> Unit,
     onUnpair: (PairedDevice) -> Unit,
+    onResetKeys: () -> Unit,
 ) {
     SectionCard(title = "Paired phones") {
         if (clients.isEmpty()) {
@@ -213,5 +241,8 @@ private fun PairedCard(
             }
         }
         PrimaryButton("Pair a new phone", onClick = onPairNew)
+        if (clients.isNotEmpty()) {
+            SecondaryButton("Remove all phones and reset keys", onClick = onResetKeys, destructive = true)
+        }
     }
 }

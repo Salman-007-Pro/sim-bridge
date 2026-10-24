@@ -7,6 +7,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.security.cert.X509Certificate
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLServerSocket
 import javax.net.ssl.SSLSocket
@@ -20,6 +21,7 @@ import kotlinx.coroutines.withContext
 /**
  * Host-side TLS listener. Every accepted connection must complete a mutual TLS 1.3 handshake
  * before a [BridgeSession] is created; authorization happens afterwards in the handshake layer.
+ * [acceptFilter] runs before any TLS work, and at most [maxPendingHandshakes] handshakes run at once.
  */
 class BridgeServer(
     private val sslContext: () -> SSLContext,
@@ -27,10 +29,13 @@ class BridgeServer(
     private val preferredPort: Int = DEFAULT_PORT,
     private val sessionConfig: SessionConfig = SessionConfig(),
     private val handshakeTimeoutMs: Int = 10_000,
+    private val maxPendingHandshakes: Int = 4,
+    private val acceptFilter: (Socket) -> Boolean = { true },
     private val onSession: suspend (BridgeSession) -> Unit,
 ) {
     private var serverSocket: SSLServerSocket? = null
     private var acceptJob: Job? = null
+    private val pendingHandshakes = AtomicInteger(0)
 
     val port: Int? get() = serverSocket?.localPort
 
@@ -73,6 +78,15 @@ class BridgeServer(
             } catch (e: IOException) {
                 if (server.isClosed) return else continue
             }
+            if (!runCatching { acceptFilter(socket) }.getOrDefault(false)) {
+                runCatching { socket.close() }
+                continue
+            }
+            if (pendingHandshakes.incrementAndGet() > maxPendingHandshakes) {
+                pendingHandshakes.decrementAndGet()
+                runCatching { socket.close() }
+                continue
+            }
             scope.launch(Dispatchers.IO) { handle(socket) }
         }
     }
@@ -88,6 +102,8 @@ class BridgeServer(
         } catch (e: Exception) {
             runCatching { socket.close() }
             return
+        } finally {
+            pendingHandshakes.decrementAndGet()
         }
         session.start()
         onSession(session)
@@ -96,6 +112,12 @@ class BridgeServer(
     companion object {
         const val DEFAULT_PORT = 47820
         private const val BACKLOG = 8
+
+        /** Accept only connections that arrived on a private LAN / hotspot address, never a public or cellular one. */
+        val localNetworkOnly: (Socket) -> Boolean = { socket ->
+            val local = socket.localAddress
+            local.isSiteLocalAddress || local.isLinkLocalAddress || local.isLoopbackAddress
+        }
     }
 }
 
