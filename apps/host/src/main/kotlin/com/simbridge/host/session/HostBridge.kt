@@ -9,7 +9,9 @@ import com.simbridge.core.crypto.PairingWindow
 import com.simbridge.core.crypto.PinnedTrustManager
 import com.simbridge.core.crypto.TlsContexts
 import com.simbridge.core.crypto.TlsIdentity
-import com.simbridge.core.model.AudioStatus
+import com.simbridge.core.media.AudioCapabilities
+import com.simbridge.core.media.AudioSupportPolicy
+import com.simbridge.core.media.CellularAudioProvider
 import com.simbridge.core.model.Clock
 import com.simbridge.core.model.Redaction
 import com.simbridge.core.protocol.Ack
@@ -85,6 +87,7 @@ class HostBridge @Inject constructor(
     private val statusSource: HostStatusSource,
     private val probe: CapabilityProbe,
     private val prefs: HostPrefs,
+    private val audioProvider: CellularAudioProvider,
     private val clock: Clock,
 ) {
     private val _state = MutableStateFlow(HostBridgeState())
@@ -106,6 +109,7 @@ class HostBridge @Inject constructor(
 
     @Volatile private var identity: TlsIdentity? = null
     @Volatile private var activeSession: BridgeSession? = null
+    @Volatile private var audioCapabilities = AudioCapabilities(false, false, false, null, "Not probed")
 
     val hostName: String
         get() = Settings.Global.getString(context.contentResolver, "device_name")?.takeIf { it.isNotBlank() } ?: Build.MODEL
@@ -119,6 +123,7 @@ class HostBridge @Inject constructor(
             lifecycle.withLock {
                 if (server != null) return@withLock
                 runCatching {
+                    audioCapabilities = audioProvider.probe()
                     val id = identityStore.getOrCreate().also { identity = it }
                     val tls = TlsContexts.create(id, PinnedTrustManager(allowAnyPeer = true))
                     val newServer = BridgeServer(sslContext = { tls }, scope = scope) { session -> onSession(session) }
@@ -226,7 +231,8 @@ class HostBridge @Inject constructor(
 
     fun capabilities(): Capabilities {
         val report = probe.run()
-        return Capabilities(calls = report.callsCapability, sms = report.smsCapability, audio = AudioStatus.UNSUPPORTED)
+        val audio = AudioSupportPolicy.status(audioCapabilities, verification = null, buildFingerprint = Build.FINGERPRINT)
+        return Capabilities(calls = report.callsCapability, sms = report.smsCapability, audio = audio)
     }
 
     /** Re-sends capabilities after the user granted or removed a role. */

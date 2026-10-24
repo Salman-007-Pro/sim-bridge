@@ -2,6 +2,8 @@ package com.simbridge.host.di
 
 import android.content.Context
 import com.simbridge.core.crypto.AndroidKeystoreIdentityStore
+import com.simbridge.core.media.CellularAudioProvider
+import com.simbridge.core.media.UnsupportedAudioProvider
 import com.simbridge.core.model.Clock
 import com.simbridge.core.storage.ledger.CommandLedger
 import com.simbridge.core.storage.ledger.LedgerDatabase
@@ -59,6 +61,11 @@ object HostModule {
     @Provides
     @Singleton
     fun hostDatabase(@ApplicationContext context: Context): HostDatabase = HostDatabase.create(context)
+
+    /** Stays the unsupported stub until a provider passes the PRD 6.4 physical-call gate. */
+    @Provides
+    @Singleton
+    fun cellularAudioProvider(): CellularAudioProvider = UnsupportedAudioProvider
 }
 
 @Module

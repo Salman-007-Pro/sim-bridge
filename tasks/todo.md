@@ -61,10 +61,12 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 
 ## Phase 6 — Audio R&D
 
-- [ ] `core:media` provider interface + unsupported stub
-- [ ] Debug-only audio lab (in-app probes, Shizuku probes, HFP probe)
-- [ ] `docs/audio-rnd/` experiment protocol + result template
-- [ ] Exit gate (device): Go / No-go
+- [x] `core:media` provider interface (PRD 6.3), `UnsupportedAudioProvider`, `AudioSupportPolicy`, `PcmStats` (4 tests)
+- [x] Debug-only audio lab: app probes, Shizuku shell probes (uid 2000), telephony TX tone, HFP client probe
+- [x] Release APK verified: no RECORD_AUDIO, no Shizuku provider
+- [x] `docs/audio-rnd/README.md`: protocol, criteria, results template
+- [x] Decision recorded: **NO-GO by default** until physical evidence → ship Tier B
+- [ ] Exit gate (device): run lab on 3 Host models / 2 OEMs and revisit decision
 
 ## Phase 7 — Audio integration (only if Go)
 
