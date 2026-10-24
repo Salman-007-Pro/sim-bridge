@@ -55,6 +55,19 @@ object HostPermissions {
     private fun roleItems(context: Context): List<PermissionItem> {
         val rm = context.getSystemService(RoleManager::class.java) ?: return emptyList()
         return buildList {
+            if (rm.isRoleAvailable(RoleManager.ROLE_DIALER)) {
+                add(
+                    PermissionItem(
+                        id = "role_dialer",
+                        title = "Default phone app",
+                        rationale = "Needed to see incoming calls and to answer, reject, end or place calls for your Client. " +
+                            "Calls still ring here and emergency calls work normally from this phone.",
+                        granted = rm.isRoleHeld(RoleManager.ROLE_DIALER),
+                        required = true,
+                        request = PermissionRequest.Role(RoleManager.ROLE_DIALER),
+                    ),
+                )
+            }
             if (rm.isRoleAvailable(RoleManager.ROLE_SMS)) {
                 add(
                     PermissionItem(

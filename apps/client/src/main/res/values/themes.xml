@@ -8,9 +8,4 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
-
-    <style name="Theme.SimBridge.Call" parent="Theme.SimBridge">
-        <item name="android:showWhenLocked">true</item>
-        <item name="android:turnScreenOn">true</item>
-    </style>
 </resources>

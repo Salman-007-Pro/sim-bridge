@@ -5,6 +5,7 @@ import com.simbridge.host.session.HostCommandHandler
 import com.simbridge.host.sms.HostMessagesRoute
 import com.simbridge.host.sms.HostMessagesScreen
 import com.simbridge.host.sms.SmsCommandHandler
+import com.simbridge.host.telephony.CallCommandHandler
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -18,6 +19,10 @@ abstract class HostFeatureModule {
     @Binds
     @IntoSet
     abstract fun smsHandler(handler: SmsCommandHandler): HostCommandHandler
+
+    @Binds
+    @IntoSet
+    abstract fun callHandler(handler: CallCommandHandler): HostCommandHandler
 
     companion object {
         @Provides

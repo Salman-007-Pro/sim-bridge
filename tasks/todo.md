@@ -45,9 +45,9 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 
 ## Phase 4 — Remote dialer
 
-- [ ] Host default dialer role: InCallService, Host in-call UI, DIAL activity
-- [ ] Call adapter + commands, no-redial rule, emergency/premium block
-- [ ] Client dial pad, history, incoming full-screen, ongoing call screen
+- [x] Host default dialer role: InCallService, Host in-call UI, DIAL activity (emergency allowed locally)
+- [x] Call adapter + commands, ledger-backed no-redial rule, emergency/premium block for remote dials
+- [x] Client dial pad, history, incoming full-screen, ongoing call screen, honest "audio on Host" notice
 - [ ] Exit gate (device): incoming/outgoing/missed/rejected/busy/locked
 
 ## Phase 5 — MVP hardening

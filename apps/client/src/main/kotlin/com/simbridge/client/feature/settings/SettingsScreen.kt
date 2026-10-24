@@ -215,12 +215,31 @@ private fun PermissionsCard() {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || granted(context, Manifest.permission.POST_NOTIFICATIONS)
     }
     val contacts = remember(refresh) { granted(context, Manifest.permission.READ_CONTACTS) }
+    val fullScreen = remember(refresh) {
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE ||
+            context.getSystemService(android.app.NotificationManager::class.java).canUseFullScreenIntent()
+    }
     SectionCard(title = "Permissions") {
         PermissionRow(
             title = "Notifications",
             description = "Needed to ring for incoming calls and show new messages.",
             granted = notifications,
             onAllow = { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) launcher.launch(Manifest.permission.POST_NOTIFICATIONS) },
+        )
+        PermissionRow(
+            title = "Full-screen incoming calls",
+            description = "Shows the incoming-call screen even when this phone is locked.",
+            granted = fullScreen,
+            onAllow = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    context.startActivity(
+                        android.content.Intent(
+                            android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                            android.net.Uri.parse("package:${context.packageName}"),
+                        ),
+                    )
+                }
+            },
         )
         PermissionRow(
             title = "Contact names (optional)",

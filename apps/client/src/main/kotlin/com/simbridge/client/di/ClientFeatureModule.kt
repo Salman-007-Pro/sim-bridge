@@ -2,6 +2,7 @@ package com.simbridge.client.di
 
 import android.content.Context
 import com.simbridge.client.data.ClientDatabase
+import com.simbridge.client.feature.calls.CallsHandler
 import com.simbridge.client.feature.messages.MessagesHandler
 import com.simbridge.client.feature.messages.SyncHandler
 import com.simbridge.client.session.ClientBridge
@@ -29,6 +30,10 @@ abstract class ClientFeatureModule {
     @Binds
     @IntoSet
     abstract fun syncHandler(handler: SyncHandler): ClientMessageHandler
+
+    @Binds
+    @IntoSet
+    abstract fun callsHandler(handler: CallsHandler): ClientMessageHandler
 
     companion object {
         @Provides
