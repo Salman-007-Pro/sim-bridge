@@ -48,6 +48,7 @@ class ProtocolCodecTest {
         MessageType.SYNC_DELTA to (SyncDelta.serializer() to SyncDelta(listOf(sms), listOf(call), 9, 4, false)),
         MessageType.ERROR to (ErrorBody.serializer() to ErrorBody(ErrorCode.REPLAY, "dup")),
         MessageType.ACK to (Ack.serializer() to Ack()),
+        MessageType.UNPAIR to (Unpair.serializer() to Unpair("user")),
     )
 
     @Suppress("UNCHECKED_CAST")

@@ -31,9 +31,9 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 
 ## Phase 2 — Pairing, onboarding, dashboards
 
-- [ ] Host onboarding (<= 6 screens) + dashboard + foreground service
-- [ ] Client onboarding (<= 4 screens) + home tabs + session service
-- [ ] Unpair / wipe, manual IP fallback
+- [x] Host onboarding (<= 6 screens) + dashboard + foreground service
+- [x] Client onboarding (<= 4 screens) + home tabs + session service
+- [x] Unpair / wipe, manual IP fallback, `UNPAIR` protocol message (both sides revoke)
 - [ ] Exit gate (device): pairing, reject unapproved, reconnect < 15s, unpair revokes
 
 ## Phase 3 — SMS bridge

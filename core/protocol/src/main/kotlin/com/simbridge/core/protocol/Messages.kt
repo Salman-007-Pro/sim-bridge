@@ -111,3 +111,7 @@ data class ErrorBody(val code: ErrorCode, val message: String)
 
 @Serializable
 data class Ack(val detail: String? = null)
+
+/** Either side revokes the pairing; the receiver forgets the sender's fingerprint. */
+@Serializable
+data class Unpair(val reason: String? = null)

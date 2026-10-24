@@ -24,5 +24,6 @@ object MessageSchemas {
         MessageType.SYNC_DELTA -> SyncDelta.serializer()
         MessageType.ERROR -> ErrorBody.serializer()
         MessageType.ACK -> Ack.serializer()
+        MessageType.UNPAIR -> Unpair.serializer()
     }
 }

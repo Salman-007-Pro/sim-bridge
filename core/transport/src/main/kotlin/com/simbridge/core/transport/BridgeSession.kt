@@ -132,7 +132,7 @@ class BridgeSession(
         if (!_closeReason.compareAndSet(null, reason)) return
         runCatching { socket.close() }
         inbox.close()
-        pending.values.forEach { it.cancel() }
+        pending.values.forEach { it.completeExceptionally(SessionClosedException(reason)) }
         pending.clear()
         scope.cancel()
     }

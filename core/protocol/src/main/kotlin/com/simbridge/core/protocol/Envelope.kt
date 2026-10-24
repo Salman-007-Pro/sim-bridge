@@ -49,6 +49,7 @@ enum class MessageType {
     SYNC_DELTA,
     ERROR,
     ACK,
+    UNPAIR,
 }
 
 @Serializable
