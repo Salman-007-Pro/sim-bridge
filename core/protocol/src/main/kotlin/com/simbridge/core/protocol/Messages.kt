@@ -117,3 +117,25 @@ data class Ack(val detail: String? = null)
 /** Either side revokes the pairing; the receiver forgets the sender's fingerprint. */
 @Serializable
 data class Unpair(val reason: String? = null)
+
+/**
+ * Host offers a voice media session for an active call (only sent when audio is VERIFIED and enabled).
+ * [mediaKeyB64] is the per-call AES master secret, safe to send here because the control channel is
+ * mutually-authenticated TLS. [udpPort] is the Host's media port; the Client replies with [AudioAnswer].
+ */
+@Serializable
+data class AudioOffer(
+    val callId: String,
+    val udpPort: Int,
+    val mediaKeyB64: String,
+    val sampleRateHz: Int,
+    val channels: Int,
+    val frameMs: Int,
+    val codec: String,
+)
+
+@Serializable
+data class AudioAnswer(val callId: String, val accepted: Boolean, val udpPort: Int, val reason: String? = null)
+
+@Serializable
+data class AudioEnd(val callId: String, val reason: String? = null)

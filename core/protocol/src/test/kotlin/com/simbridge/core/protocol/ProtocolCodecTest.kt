@@ -49,6 +49,9 @@ class ProtocolCodecTest {
         MessageType.ERROR to (ErrorBody.serializer() to ErrorBody(ErrorCode.REPLAY, "dup")),
         MessageType.ACK to (Ack.serializer() to Ack()),
         MessageType.UNPAIR to (Unpair.serializer() to Unpair("user")),
+        MessageType.AUDIO_OFFER to (AudioOffer.serializer() to AudioOffer("c1", 47900, "a".repeat(44), 16000, 1, 20, "pcm16")),
+        MessageType.AUDIO_ANSWER to (AudioAnswer.serializer() to AudioAnswer("c1", true, 47901)),
+        MessageType.AUDIO_END to (AudioEnd.serializer() to AudioEnd("c1", "ended")),
     )
 
     @Suppress("UNCHECKED_CAST")

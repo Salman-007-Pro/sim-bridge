@@ -50,6 +50,9 @@ enum class MessageType {
     ERROR,
     ACK,
     UNPAIR,
+    AUDIO_OFFER,
+    AUDIO_ANSWER,
+    AUDIO_END,
 }
 
 @Serializable

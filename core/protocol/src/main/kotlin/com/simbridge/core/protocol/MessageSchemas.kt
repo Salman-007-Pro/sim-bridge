@@ -25,5 +25,8 @@ object MessageSchemas {
         MessageType.ERROR -> ErrorBody.serializer()
         MessageType.ACK -> Ack.serializer()
         MessageType.UNPAIR -> Unpair.serializer()
+        MessageType.AUDIO_OFFER -> AudioOffer.serializer()
+        MessageType.AUDIO_ANSWER -> AudioAnswer.serializer()
+        MessageType.AUDIO_END -> AudioEnd.serializer()
     }
 }

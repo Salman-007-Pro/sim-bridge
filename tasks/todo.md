@@ -68,10 +68,15 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 - [x] Decision recorded: **NO-GO by default** until physical evidence → ship Tier B
 - [ ] Exit gate (device): run lab on 3 Host models / 2 OEMs and revisit decision
 
-## Phase 7 — Audio integration (only if Go)
+## Phase 7 — Audio integration (built, gated OFF)
 
-- Gated: Phase 6 decision is NO-GO until device evidence exists. Not started on purpose (PRD 14: do not build the
-  media path before a capture/inject provider is proven).
+- [x] `core:media` engine: `MediaCrypto` (HKDF + per-direction AES-256-GCM), `MediaPacket`, `JitterBuffer`,
+      `AudioCodec`/`RawPcmCodec`, `DatagramTransport`/`UdpDatagramTransport`, `MediaSession`
+- [x] Protocol: `AUDIO_OFFER` / `AUDIO_ANSWER` / `AUDIO_END` (media key shared over authenticated TLS control channel)
+- [x] `AudioFeature` flag: `ENABLED=false`; `isAvailable()` also requires `AudioStatus.VERIFIED`
+- [x] JVM tests (15): crypto round-trip/tamper/direction isolation, packet codec, jitter reorder/gap/late,
+      full `MediaSession` loopback round-trip + packet-loss concealment
+- [ ] Wire to real audio hardware + turn flag on — only after Phase 6 GO on a verified Host build
 
 ## Phase 8 — Public readiness
 
