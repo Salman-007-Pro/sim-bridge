@@ -1,5 +1,9 @@
 package com.simbridge.host.di
 
+import com.simbridge.host.feature.support.BatteryRoute
+import com.simbridge.host.feature.support.BatteryScreen
+import com.simbridge.host.feature.support.DebugReportRoute
+import com.simbridge.host.feature.support.DebugReportScreen
 import com.simbridge.host.navigation.HostTool
 import com.simbridge.host.session.HostCommandHandler
 import com.simbridge.host.sms.HostMessagesRoute
@@ -28,5 +32,13 @@ abstract class HostFeatureModule {
         @Provides
         @IntoSet
         fun messagesTool(): HostTool = HostTool("Messages on this phone", HostMessagesRoute) { onBack -> HostMessagesScreen(onBack) }
+
+        @Provides
+        @IntoSet
+        fun batteryTool(): HostTool = HostTool("Battery and background", BatteryRoute) { onBack -> BatteryScreen(onBack) }
+
+        @Provides
+        @IntoSet
+        fun debugTool(): HostTool = HostTool("Debug report", DebugReportRoute) { onBack -> DebugReportScreen(onBack) }
     }
 }

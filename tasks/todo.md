@@ -52,11 +52,12 @@ export JAVA_HOME="/c/Program Files/Android/Android Studio1/jbr"
 
 ## Phase 5 — MVP hardening
 
-- [ ] Boot recovery, battery guidance, permission revocation handling
-- [ ] Redacted logging + debug export
-- [ ] Accessibility pass + UI tests
-- [ ] Signed release APKs
-- [ ] Exit gate (device): 10-minute reliability run
+- [x] Boot / app-update recovery, battery + OEM guidance, role revocation pushes new CAPABILITIES
+- [x] Redacted logging + scrubbed debug export (both apps)
+- [x] Accessibility: TalkBack labels, live regions, 72dp call targets; Compose UI tests (device)
+- [x] Signed release APKs in `release-apks/` (local keystore, gitignored)
+- [x] JVM reliability: 194/194 ACK on loopback, reconnect 33 ms (`-PsoakSeconds=600` for 10 min)
+- [ ] Exit gate (device): 10-minute reliability run on Wi-Fi — see `docs/testing-on-devices.md`
 
 ## Phase 6 — Audio R&D
 

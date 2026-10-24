@@ -41,6 +41,8 @@ import com.simbridge.core.ui.components.PrimaryButton
 import com.simbridge.core.ui.components.SecondaryButton
 import com.simbridge.core.ui.components.SectionCard
 import com.simbridge.core.ui.components.StatusChip
+import com.simbridge.core.ui.power.BatteryGuideCard
+import com.simbridge.core.ui.report.DebugReport
 import com.simbridge.core.ui.theme.Spacing
 import com.simbridge.core.ui.theme.StatusTone
 
@@ -73,6 +75,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             SecondaryButton("Set Host address", onClick = { editingEndpoint = true })
         }
         PermissionsCard()
+        BatteryGuideCard(appRole = "Client app")
         SectionCard(title = "Privacy") {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -85,6 +88,15 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                 }
                 Switch(checked = hideContent, onCheckedChange = viewModel::setHideContent)
             }
+        }
+        SectionCard(title = "Support") {
+            Text(
+                "Share a technical report if something does not work. Numbers, messages and keys are removed first.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            val context = LocalContext.current
+            SecondaryButton("Share debug report", onClick = { DebugReport.share(context, viewModel.debugReport(context)) })
         }
         SectionCard(title = "Data and pairing") {
             SecondaryButton("Wipe messages and call history on this phone", onClick = { confirm = Confirm.WIPE })

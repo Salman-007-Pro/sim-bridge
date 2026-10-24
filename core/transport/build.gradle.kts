@@ -10,7 +10,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    testOptions { unitTests.isReturnDefaultValues = true }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.all { test ->
+            test.systemProperty("simbridge.soakSeconds", providers.gradleProperty("soakSeconds").getOrElse("3"))
+            test.testLogging { showStandardStreams = true }
+        }
+    }
 }
 
 dependencies {

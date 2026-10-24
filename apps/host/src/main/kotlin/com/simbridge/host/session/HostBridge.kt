@@ -32,6 +32,7 @@ import com.simbridge.core.transport.handshake.HostHandshakeResult
 import com.simbridge.core.transport.handshake.PairedClientRegistry
 import com.simbridge.core.transport.handshake.PairingApprovalRequest
 import com.simbridge.host.BuildConfig
+import com.simbridge.host.data.HostPrefs
 import com.simbridge.host.di.ApplicationScope
 import com.simbridge.host.feature.probe.CapabilityProbe
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -83,6 +84,7 @@ class HostBridge @Inject constructor(
     private val pairedStore: PairedDeviceStore,
     private val statusSource: HostStatusSource,
     private val probe: CapabilityProbe,
+    private val prefs: HostPrefs,
     private val clock: Clock,
 ) {
     private val _state = MutableStateFlow(HostBridgeState())
@@ -124,7 +126,18 @@ class HostBridge @Inject constructor(
                     server = newServer
                     nsd.register("SIM Bridge ${hostName.take(24)}", port, id.fingerprint)
                     _state.update { it.copy(running = true, port = port, addresses = NetworkAddresses.localIpv4(), error = null) }
-                    statusJob = scope.launch { statusSource.status.drop(1).collect { publish(MessageType.HOST_STATUS, HostStatus.serializer(), it) } }
+                    statusJob = scope.launch {
+                        var lastCapabilities = capabilities()
+                        statusSource.status.drop(1).collect { status ->
+                            publish(MessageType.HOST_STATUS, HostStatus.serializer(), status)
+                            val current = capabilities()
+                            if (current != lastCapabilities) {
+                                lastCapabilities = current
+                                BridgeLog.w(TAG, "Capabilities changed: calls=${current.calls} sms=${current.sms}")
+                                publish(MessageType.CAPABILITIES, Capabilities.serializer(), current)
+                            }
+                        }
+                    }
                     BridgeLog.i(TAG, "Bridge listening on port $port")
                 }.onFailure { error ->
                     BridgeLog.e(TAG, "Bridge failed to start", error)
@@ -150,6 +163,17 @@ class HostBridge @Inject constructor(
     }
 
     fun refreshAddresses() = _state.update { it.copy(addresses = NetworkAddresses.localIpv4()) }
+
+    /** Called from SMS / call entry points: if the process was restarted without the service, bring it back. */
+    fun ensureServiceRunning() {
+        if (server != null) return
+        scope.launch {
+            if (prefs.isBridgeEnabled()) {
+                runCatching { HostBridgeService.start(context) }
+                    .onFailure { BridgeLog.w(TAG, "Could not restart bridge from background", it) }
+            }
+        }
+    }
 
     fun startPairing(): PairingPayload? {
         val id = identity ?: return null

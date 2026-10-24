@@ -49,6 +49,7 @@ class SmsDeliverReceiver : BroadcastReceiver() {
         val body = parts.joinToString("") { it.displayMessageBody.orEmpty() }
         val sentAt = parts.first().timestampMillis
         val subId = intent.getIntExtra("subscription", -1).takeIf { it >= 0 }
+        bridge.ensureServiceRunning()
         runAsync(scope) {
             val now = System.currentTimeMillis()
             val uri = provider.insertInbox(address, body, sentAt, now, subId)

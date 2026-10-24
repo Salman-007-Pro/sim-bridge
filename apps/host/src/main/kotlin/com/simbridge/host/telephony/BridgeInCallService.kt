@@ -2,6 +2,7 @@ package com.simbridge.host.telephony
 
 import android.telecom.Call
 import android.telecom.InCallService
+import com.simbridge.host.session.HostBridge
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -10,11 +11,13 @@ import javax.inject.Inject
 class BridgeInCallService : InCallService() {
     @Inject lateinit var registry: CallRegistry
     @Inject lateinit var notifier: HostCallNotifier
+    @Inject lateinit var bridge: HostBridge
 
     override fun onCreate() {
         super.onCreate()
         registry.attach(this)
         notifier.start()
+        bridge.ensureServiceRunning()
     }
 
     override fun onCallAdded(call: Call) {
